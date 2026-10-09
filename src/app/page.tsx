@@ -211,6 +211,17 @@ export default function HomePage() {
                 Home
               </a>
               <a
+                href="#schools-section"
+                onClick={() => setActiveNav("schools")}
+                className={`px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 ${
+                  activeNav === "schools"
+                    ? "bg-[#eef4ff] text-[#1e3a8a] font-semibold"
+                    : "text-slate-600 hover:text-slate-950 hover:bg-slate-50"
+                }`}
+              >
+                Partner Schools
+              </a>
+              <a
                 href="#how-it-works-section"
                 onClick={() => setActiveNav("how")}
                 className={`px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 ${
@@ -307,7 +318,87 @@ export default function HomePage() {
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. HOW IT WORKS SECTION                                                  */}
+      {/* 2. PARTNER SCHOOLS / SELECT YOUR INSTITUTION                              */}
+      {/* ========================================================================= */}
+      <section id="schools-section" className="py-12 sm:py-16 max-w-6xl mx-auto px-4 sm:px-6 w-full">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-3">
+          <div>
+            <span className="text-xs font-bold text-blue-800 uppercase tracking-wider block mb-1">
+              Select Your Institution
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+              Partner Schools
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Tap on your school to browse official approved uniforms and size guides.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {(schools.length > 0
+            ? schools.map((s) => ({
+                code: s.code,
+                name: s.name,
+                fullName: s.name,
+                primaryColor: s.primary_color || "#1e3a8a",
+                logoImage: s.logo_url || FEATURED_SCHOOLS.find((f) => f.code.toUpperCase() === s.code.toUpperCase())?.logoImage,
+                logoText: s.code.slice(0, 3).toUpperCase(),
+                productsCount: s._count?.schoolProducts ? `${s._count.schoolProducts} Products` : "Uniform Store",
+              }))
+            : FEATURED_SCHOOLS
+          ).map((school) => (
+            <Link
+              key={school.code}
+              href={`/s/${school.code.toLowerCase()}`}
+              className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs hover:shadow-xl hover:border-blue-300 hover:-translate-y-1 transition-all duration-200 flex items-center justify-between gap-4 group cursor-pointer"
+            >
+              <div className="flex items-center gap-4 min-w-0">
+                {/* School Logo Avatar / Badge */}
+                <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-200/80 p-1 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden group-hover:scale-105 transition-transform">
+                  {school.logoImage ? (
+                    <img
+                      src={school.logoImage}
+                      alt={school.name}
+                      className="w-full h-full object-contain rounded-xl"
+                    />
+                  ) : (
+                    <div
+                      className="w-full h-full rounded-xl flex items-center justify-center font-black text-sm text-white shadow-inner"
+                      style={{ backgroundColor: school.primaryColor || "#1e3a8a" }}
+                    >
+                      {school.logoText || school.code.slice(0, 3)}
+                    </div>
+                  )}
+                </div>
+
+                {/* School Info */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md bg-blue-50 text-blue-800 border border-blue-100">
+                      {school.code}
+                    </span>
+                  </div>
+                  <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-snug truncate group-hover:text-blue-900 transition-colors">
+                    {school.name || school.fullName}
+                  </h3>
+                  <p className="text-xs text-slate-400 font-medium mt-0.5">
+                    {school.productsCount || "Official Store"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <div className="w-10 h-10 rounded-2xl bg-slate-50 group-hover:bg-[#0c2461] text-slate-400 group-hover:text-white flex items-center justify-center shrink-0 transition-all duration-200 shadow-2xs">
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 3. HOW IT WORKS SECTION                                                  */}
       {/* ========================================================================= */}
       <section id="how-it-works-section" className="py-12 sm:py-16 bg-white border-y border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">

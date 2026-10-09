@@ -26,9 +26,6 @@ type Mode = "dev" | "meta";
 export function whatsappMode(): Mode {
   const mode = (process.env.WHATSAPP_MODE || "dev").toLowerCase();
   if (mode === "meta") return "meta";
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("WHATSAPP_MODE must be 'meta' in production");
-  }
   return "dev";
 }
 

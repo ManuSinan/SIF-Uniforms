@@ -1,0 +1,492 @@
+// Prisma schema for Multi-School Uniform Ordering PWA
+// Database: MySQL with clean Auto-Increment Integer IDs
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  super_admin
+  school_admin
+  parent
+}
+
+enum Gender {
+  boys
+  girls
+  all
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  partial_refund
+  refunded
+  failed
+}
+
+enum OrderStatus {
+  pending_payment
+  placed
+  confirmed
+  packed
+  out_for_delivery
+  delivered
+  cancelled
+}
+
+enum PaymentType {
+  initial
+  extra
+}
+
+enum RefundStatus {
+  pending
+  processed
+  failed
+}
+
+enum StudentVerification {
+  pending
+  verified
+  rejected
+}
+
+enum ChangeRequestStatus {
+  pending
+  approved
+  rejected
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  mobile    String   @unique
+  name      String
+  email     String?
+  role      Role
+  school_id Int?
+  is_active Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  school         School?         @relation(fields: [school_id], references: [id])
+  students       Student[]
+  addresses      Address[]
+  carts          Cart[]
+  orders         Order[]
+  changeRequests ChangeRequest[]
+  auditLogs      AuditLog[]
+
+  @@index([school_id])
+  @@map("users")
+}
+
+model School {
+  id                           Int      @id @default(autoincrement())
+  name                         String
+  code                         String   @unique
+  logo_url                     String?
+  primary_color                String   @default("#1e3a8a")
+  secondary_color              String   @default("#fbbf24")
+  address                      String?
+  contact_phone                String?
+  delivery_charge              Int      @default(0) // in paise
+  free_delivery_above          Int?     // in paise
+  allow_admin_price_stock_edit Boolean  @default(false)
+  is_active                    Boolean  @default(true)
+  createdAt                    DateTime @default(now()) @map("created_at")
+  updatedAt                    DateTime @updatedAt @map("updated_at")
+
+  users               User[]
+  serviceablePincodes SchoolServiceablePincode[]
+  students            Student[]
+  schoolProducts      SchoolProduct[]
+  orders              Order[]
+
+  @@map("schools")
+}
+
+model SchoolServiceablePincode {
+  id        Int      @id @default(autoincrement())
+  school_id Int
+  pincode   String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  school School @relation(fields: [school_id], references: [id], onDelete: Cascade)
+
+  @@index([school_id])
+  @@index([pincode])
+  @@map("school_serviceable_pincodes")
+}
+
+model OtpRequest {
+  id         Int      @id @default(autoincrement())
+  mobile     String
+  otp_hash   String
+  expires_at DateTime
+  attempts   Int      @default(0)
+  used       Boolean  @default(false)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([mobile])
+  @@map("otp_requests")
+}
+
+model Student {
+  id           Int      @id @default(autoincrement())
+  parent_id    Int
+  school_id    Int
+  name         String
+  class        String   // Nursery, LKG, UKG, 1, 2, ..., 12
+  section      String?
+  admission_no String?
+  gender       Gender   @default(all)
+  // Schools confirm each child against their records before the first order ships
+  verification_status StudentVerification @default(pending)
+  verified_by         String?
+  verified_at         DateTime?
+  rejection_reason    String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  parent User   @relation(fields: [parent_id], references: [id], onDelete: Cascade)
+  school School @relation(fields: [school_id], references: [id], onDelete: Cascade)
+  carts  Cart[]
+  orders Order[]
+
+  @@index([parent_id])
+  @@index([school_id])
+  @@index([school_id, admission_no])
+  @@map("students")
+}
+
+model Address {
+  id         Int      @id @default(autoincrement())
+  parent_id  Int
+  name       String
+  phone      String
+  line1      String
+  line2      String?
+  city       String
+  pincode    String
+  landmark   String?
+  is_default Boolean  @default(false)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  parent User    @relation(fields: [parent_id], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@index([parent_id])
+  @@map("addresses")
+}
+
+model Product {
+  id                   Int      @id @default(autoincrement())
+  name                 String
+  category             String
+  description          String?
+  size_chart_text      String?
+  size_chart_image_url String?
+  is_active            Boolean  @default(true)
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  sizes          ProductSize[]
+  schoolProducts SchoolProduct[]
+
+  @@map("products")
+}
+
+model ProductSize {
+  id         Int      @id @default(autoincrement())
+  product_id Int
+  size_label String
+  sort_order Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  product  Product                @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  variants SchoolProductVariant[]
+
+  @@index([product_id])
+  @@map("product_sizes")
+}
+
+model SchoolProduct {
+  id         Int      @id @default(autoincrement())
+  school_id  Int
+  product_id Int
+  color_name String
+  image_url  String?
+  gender     Gender   @default(all)
+  class_from String
+  class_to   String
+  is_active  Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  school   School                 @relation(fields: [school_id], references: [id], onDelete: Cascade)
+  product  Product                @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  variants SchoolProductVariant[]
+
+  @@index([school_id])
+  @@index([product_id])
+  @@map("school_products")
+}
+
+model SchoolProductVariant {
+  id                Int      @id @default(autoincrement())
+  school_product_id Int
+  size_id           Int
+  price             Int      // in paise
+  stock             Int      @default(0)
+  reserved_stock    Int      @default(0)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  schoolProduct SchoolProduct @relation(fields: [school_product_id], references: [id], onDelete: Cascade)
+  size          ProductSize   @relation(fields: [size_id], references: [id], onDelete: Cascade)
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+
+  @@index([school_product_id])
+  @@index([size_id])
+  @@map("school_product_variants")
+}
+
+model Cart {
+  id         Int      @id @default(autoincrement())
+  parent_id  Int
+  student_id Int?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  parent  User       @relation(fields: [parent_id], references: [id], onDelete: Cascade)
+  student Student?   @relation(fields: [student_id], references: [id], onDelete: SetNull)
+  items   CartItem[]
+
+  @@index([parent_id])
+  @@index([student_id])
+  @@map("carts")
+}
+
+model CartItem {
+  id         Int      @id @default(autoincrement())
+  cart_id    Int
+  variant_id Int
+  qty        Int      @default(1)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  cart    Cart                 @relation(fields: [cart_id], references: [id], onDelete: Cascade)
+  variant SchoolProductVariant @relation(fields: [variant_id], references: [id], onDelete: Cascade)
+
+  @@index([cart_id])
+  @@index([variant_id])
+  @@map("cart_items")
+}
+
+model Order {
+  id                  Int           @id @default(autoincrement())
+  order_no            String        @unique
+  parent_id           Int
+  student_id          Int
+  school_id           Int
+  address_id          Int?
+  address_snapshot    Json
+  items_total         Int           // in paise
+  delivery_charge     Int           // in paise
+  grand_total         Int           // in paise
+  amount_paid         Int           @default(0) // in paise
+  payment_status      PaymentStatus @default(pending)
+  order_status        OrderStatus   @default(pending_payment)
+  tracking_token      String        @unique
+  courier_name        String?
+  courier_phone       String?
+  courier_tracking_no String?
+  delivery_note       String?
+  delivery_proof_url  String?
+  edited_count        Int           @default(0)
+  is_locked           Boolean       @default(false)
+  pending_edit        Json?
+  expires_at          DateTime?
+  deleted_at          DateTime?
+  deleted_by          String?
+  delete_reason       String?
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
+
+  parent         User                @relation(fields: [parent_id], references: [id])
+  student        Student             @relation(fields: [student_id], references: [id])
+  school         School              @relation(fields: [school_id], references: [id])
+  address        Address?            @relation(fields: [address_id], references: [id], onDelete: SetNull)
+  items          OrderItem[]
+  payments       Payment[]
+  refunds        Refund[]
+  statusHistory  OrderStatusHistory[]
+  editHistory    OrderEditHistory[]
+  changeRequests ChangeRequest[]
+
+  @@index([school_id])
+  @@index([parent_id])
+  @@index([student_id])
+  @@index([order_no])
+  @@index([tracking_token])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          Int      @id @default(autoincrement())
+  order_id    Int
+  variant_id  Int?
+  item_name   String
+  size        String
+  color       String
+  qty         Int
+  unit_price  Int      // in paise
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  order   Order                 @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  variant SchoolProductVariant? @relation(fields: [variant_id], references: [id], onDelete: SetNull)
+
+  @@index([order_id])
+  @@index([variant_id])
+  @@map("order_items")
+}
+
+model Payment {
+  id                  Int         @id @default(autoincrement())
+  order_id            Int
+  razorpay_order_id   String
+  razorpay_payment_id String?
+  amount              Int         // in paise
+  type                PaymentType @default(initial)
+  status              String
+  createdAt           DateTime    @default(now()) @map("created_at")
+  updatedAt           DateTime    @updatedAt @map("updated_at")
+
+  order Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  @@index([order_id])
+  @@index([razorpay_order_id])
+  @@map("payments")
+}
+
+model Refund {
+  id                 Int          @id @default(autoincrement())
+  order_id           Int
+  razorpay_refund_id String?
+  amount             Int          // in paise
+  reason             String?
+  status             RefundStatus @default(pending)
+  processed_by       String?
+  reference          String?      // UTR / bank / UPI reference for manual refunds
+  processed_at       DateTime?
+  createdAt          DateTime     @default(now()) @map("created_at")
+  updatedAt          DateTime     @updatedAt @map("updated_at")
+
+  order Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  @@index([order_id])
+  @@map("refunds")
+}
+
+model OrderStatusHistory {
+  id         Int      @id @default(autoincrement())
+  order_id   Int
+  status     String
+  changed_by String?
+  note       String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  order Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  @@index([order_id])
+  @@map("order_status_history")
+}
+
+model OrderEditHistory {
+  id         Int      @id @default(autoincrement())
+  order_id   Int
+  edited_by  String
+  role       String
+  old_data   Json
+  new_data   Json
+  reason     String
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  order Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  @@index([order_id])
+  @@map("order_edit_history")
+}
+
+model ChangeRequest {
+  id            Int                 @id @default(autoincrement())
+  order_id      Int
+  parent_id     Int
+  message       String
+  // Optional structured request: swap one order item to another size of the same product
+  order_item_id        Int?
+  requested_variant_id Int?
+  status        ChangeRequestStatus @default(pending)
+  handled_by    String?
+  response_note String?
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt @map("updated_at")
+
+  order  Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  parent User  @relation(fields: [parent_id], references: [id], onDelete: Cascade)
+
+  @@index([order_id])
+  @@index([parent_id])
+  @@map("change_requests")
+}
+
+model WebhookEvent {
+  id           Int      @id @default(autoincrement())
+  provider     String
+  event_id     String   @unique
+  processed_at DateTime @default(now())
+
+  @@map("webhook_events")
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  user_id    Int?
+  action     String
+  entity     String
+  entity_id  String?
+  details    Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id])
+  @@index([entity, entity_id])
+  @@map("audit_logs")
+}
+
+model WhatsappLog {
+  id                  Int      @id @default(autoincrement())
+  mobile              String
+  template            String
+  order_id            Int?
+  status              String
+  provider_message_id String?
+  error               String?
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  @@index([mobile])
+  @@index([order_id])
+  @@map("whatsapp_log")
+}

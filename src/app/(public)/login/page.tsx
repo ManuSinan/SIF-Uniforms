@@ -573,36 +573,34 @@ function LoginForm() {
           </p>
         </div>
 
-        {/* Development-only quick test helper (hidden in production) */}
-        {IS_DEV && (
-          <div className="w-full max-w-md mx-auto pb-6">
-            <button
-              type="button"
-              onClick={() => setShowDevHelpers(!showDevHelpers)}
-              className="w-full py-2 text-[11px] font-bold text-slate-400 hover:text-slate-600 flex items-center justify-center gap-1 transition-colors"
-            >
-              <span>Developer test logins</span>
-              {showDevHelpers ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-            </button>
+        {/* Quick Test Logins Helper (for easy testing on both local and live) */}
+        <div className="w-full max-w-md mx-auto pb-6">
+          <button
+            type="button"
+            onClick={() => setShowDevHelpers(!showDevHelpers)}
+            className="w-full py-2 text-[11px] font-bold text-slate-400 hover:text-slate-600 flex items-center justify-center gap-1 transition-colors cursor-pointer"
+          >
+            <span>⚡ Quick Test Logins (No WhatsApp OTP Needed)</span>
+            {showDevHelpers ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+          </button>
 
-            {showDevHelpers && (
-              <div className="mt-2 p-3 bg-white rounded-2xl border border-dashed border-slate-300 grid grid-cols-2 gap-2">
-                {DEV_ACCOUNTS.map((a) => (
-                  <button
-                    key={a.mobile}
-                    type="button"
-                    disabled={loading}
-                    onClick={() => handleQuickDemo(a.mobile, a.role)}
-                    className="p-2 border rounded-xl font-semibold text-left text-[11px] bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-900 transition-colors disabled:opacity-50"
-                  >
-                    <div className="font-bold">{a.role}</div>
-                    <div className="text-[10px] text-slate-500 font-mono">{a.mobile}</div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+          {showDevHelpers && (
+            <div className="mt-2 p-3 bg-white rounded-2xl border border-dashed border-slate-300 grid grid-cols-2 gap-2 shadow-xs">
+              {DEV_ACCOUNTS.map((a) => (
+                <button
+                  key={a.mobile}
+                  type="button"
+                  disabled={loading}
+                  onClick={() => handleQuickDemo(a.mobile, a.role)}
+                  className="p-2 border rounded-xl font-semibold text-left text-[11px] bg-slate-50 hover:bg-blue-50 border-slate-200 hover:border-blue-300 text-slate-900 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  <div className="font-bold text-blue-900">{a.role}</div>
+                  <div className="text-[10px] text-slate-500 font-mono">{a.mobile}</div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );

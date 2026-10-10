@@ -11,19 +11,6 @@ export async function requestOtp(mobileRaw: string): Promise<{ success: boolean;
     return { success: false, message: "Please enter a valid 10-digit mobile number" };
   }
 
-  // Check rate limit in last 1 hour
-  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-  const recentRequests = await prisma.otpRequest.count({
-    where: {
-      mobile,
-      createdAt: { gte: oneHourAgo },
-    },
-  });
-
-  if (recentRequests >= OTP_CONFIG.MAX_PER_HOUR) {
-    return { success: false, message: "Too many OTP requests. Please try again later." };
-  }
-
   // Dev WhatsApp mode (never allowed in production) uses a fixed code so testers can log in.
   const devMode = whatsappMode() === "dev";
   const otp = devMode ? process.env.WHATSAPP_TEST_OTP || "123456" : randomInt(100000, 1000000).toString();

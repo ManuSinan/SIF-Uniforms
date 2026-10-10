@@ -1,15 +1,22 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Download, X, Share } from "lucide-react";
 
 export function PwaInstallPrompt() {
+  const pathname = usePathname();
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
+    // Only show prompt on the landing page
+    if (pathname !== "/") {
+      setShowPrompt(false);
+      return;
+    }
     // 1. Check if already running in standalone PWA mode
     const checkStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
@@ -53,7 +60,7 @@ export function PwaInstallPrompt() {
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     };
-  }, []);
+  }, [pathname]);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
@@ -71,7 +78,7 @@ export function PwaInstallPrompt() {
     sessionStorage.setItem("pwa_prompt_dismissed", "true");
   };
 
-  if (!showPrompt || isStandalone) {
+  if (pathname !== "/" || !showPrompt || isStandalone) {
     return null;
   }
 

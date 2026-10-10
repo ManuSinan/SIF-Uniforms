@@ -468,7 +468,7 @@ export default function SuperCataloguePage() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div
-                          className="w-8 h-8 rounded-xl text-white font-bold flex items-center justify-center text-xs shadow-2xs shrink-0"
+                          className="min-w-8 h-8 px-1.5 rounded-xl text-white font-bold flex items-center justify-center text-[10px] shadow-2xs shrink-0"
                           style={{ backgroundColor: item.school.primary_color }}
                         >
                           {item.school.code}
@@ -478,7 +478,7 @@ export default function SuperCataloguePage() {
                         </span>
                       </div>
 
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 uppercase tracking-wider">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 uppercase tracking-wider whitespace-nowrap shrink-0">
                         Class {item.class_from}-{item.class_to}
                       </span>
                     </div>

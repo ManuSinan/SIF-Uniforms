@@ -25,7 +25,7 @@ export const SuperAdminBottomNav: React.FC = () => {
   ];
 
   return (
-    <div className="fixed bottom-3 left-0 right-0 z-50 px-3 md:hidden pointer-events-none">
+    <div className="fixed bottom-3 left-0 right-0 z-40 px-3 md:hidden pointer-events-none">
       <nav className="max-w-md mx-auto bg-[#061536]/95 backdrop-blur-xl border border-white/15 shadow-2xl shadow-blue-950/40 rounded-full px-2 py-1.5 flex items-center justify-around pointer-events-auto text-white">
         {navItems.map((item) => {
           const Icon = item.icon;

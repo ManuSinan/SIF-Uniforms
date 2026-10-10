@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <linearGradient id="oia-crimson" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#881337" />
+      <stop offset="100%" stop-color="#4c0519" />
+    </linearGradient>
+    <linearGradient id="oia-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="50%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#ca8a04" />
+    </linearGradient>
+    <filter id="oia-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Outer Ring with Gold Border -->
+  <circle cx="100" cy="100" r="94" fill="#ffffff" stroke="url(#oia-gold)" stroke-width="4.5" filter="url(#oia-shadow)" />
+  <circle cx="100" cy="100" r="86" fill="none" stroke="#881337" stroke-width="1.5" stroke-dasharray="3,2" />
+
+  <!-- Heraldic Shield Body -->
+  <path d="M 58 52 L 142 52 C 142 52 146 98 100 138 C 54 98 58 52 58 52 Z" fill="url(#oia-crimson)" stroke="url(#oia-gold)" stroke-width="3" />
+
+  <!-- Imperial Crown on Shield -->
+  <path d="M 82 66 L 86 78 L 114 78 L 118 66 L 108 72 L 100 62 L 92 72 Z" fill="url(#oia-gold)" stroke="#ffffff" stroke-width="0.7" />
+  <circle cx="82" cy="65" r="2" fill="#ffffff" />
+  <circle cx="100" cy="61" r="2.2" fill="#ffffff" />
+  <circle cx="118" cy="65" r="2" fill="#ffffff" />
+
+  <!-- Open Veritas Book in Center of Shield -->
+  <path d="M 74 88 Q 100 82 100 94 Q 100 82 126 88 L 124 112 Q 100 106 100 118 Q 100 106 76 112 Z" fill="#ffffff" stroke="url(#oia-gold)" stroke-width="1.5" />
+  <line x1="100" y1="94" x2="100" y2="118" stroke="url(#oia-crimson)" stroke-width="1.5" />
+
+  <!-- Golden Stars of Excellence -->
+  <polygon points="100,120 101.5,124 106,124 102.5,127 104,131 100,128.5 96,131 97.5,127 94,124 98.5,124" fill="url(#oia-gold)" />
+
+  <!-- Top Text -->
+  <text x="100" y="30" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="8.5" fill="#4c0519" letter-spacing="1.5">OXFORD INTL ACADEMY</text>
+  <text x="100" y="42" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="7" fill="#ca8a04" letter-spacing="1">EXCELLENCE &#8226; INTEGRITY</text>
+
+  <!-- Bottom Ribbon -->
+  <path d="M 38 154 Q 100 168 162 154 L 158 170 Q 100 184 42 170 Z" fill="url(#oia-crimson)" stroke="url(#oia-gold)" stroke-width="1.5"/>
+  <text x="100" y="164" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="8" fill="#ffffff" letter-spacing="1.2">SAPERE AUDE &#8226; LEAD</text>
+</svg>

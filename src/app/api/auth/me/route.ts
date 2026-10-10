@@ -26,6 +26,7 @@ export async function GET() {
         mobile: user.mobile,
         email: user.email,
         role: user.role,
+        schoolId: user.school_id,
         school: user.school,
       },
     });

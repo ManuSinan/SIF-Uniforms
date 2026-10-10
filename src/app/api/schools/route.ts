@@ -51,6 +51,7 @@ export async function POST(req: NextRequest) {
     const {
       name,
       code,
+      logo_url,
       primaryColor,
       secondaryColor,
       address,
@@ -105,6 +106,7 @@ export async function POST(req: NextRequest) {
       data: {
         name: name.trim(),
         code: cleanCode,
+        logo_url: logo_url?.trim() || null,
         primary_color: primaryColor || "#1e3a8a",
         secondary_color: secondaryColor || "#f59e0b",
         address: address?.trim() || null,

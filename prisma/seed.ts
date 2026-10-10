@@ -29,7 +29,7 @@ async function main() {
     {
       code: "SXHS",
       name: "St. Xavier's High School",
-      logo_url: "/images/schools/sxhs-logo.jpg",
+      logo_url: "/images/schools/sxhs-logo.svg",
       primary_color: "#1e3a8a",
       secondary_color: "#f59e0b",
       delivery_charge: 10000, // ₹100
@@ -45,7 +45,7 @@ async function main() {
     {
       code: "GWIS",
       name: "Greenwood International School",
-      logo_url: "/images/schools/gwis-logo.jpg",
+      logo_url: "/images/schools/gwis-logo.svg",
       primary_color: "#065f46",
       secondary_color: "#f97316",
       delivery_charge: 15000, // ₹150
@@ -61,7 +61,7 @@ async function main() {
     {
       code: "MES",
       name: "MES Higher Secondary School",
-      logo_url: "/images/schools/mes-logo.jpg",
+      logo_url: "/images/schools/mes-logo.svg",
       primary_color: "#0f766e",
       secondary_color: "#fbbf24",
       delivery_charge: 8000, // ₹80
@@ -77,7 +77,7 @@ async function main() {
     {
       code: "JDT",
       name: "JDT Iqraa English School",
-      logo_url: "/images/schools/jdt-logo.jpg",
+      logo_url: "/images/schools/jdt-logo.svg",
       primary_color: "#92400e",
       secondary_color: "#1e3a8a",
       delivery_charge: 9000, // ₹90
@@ -93,7 +93,7 @@ async function main() {
     {
       code: "MR",
       name: "Markaz Residential School",
-      logo_url: "/images/schools/markaz-logo.jpg",
+      logo_url: "/images/schools/markaz-logo.svg",
       primary_color: "#1e293b",
       secondary_color: "#10b981",
       delivery_charge: 12000, // ₹120
@@ -109,7 +109,7 @@ async function main() {
     {
       code: "KMO",
       name: "KMO English Medium School",
-      logo_url: "/images/schools/kmo-logo.jpg",
+      logo_url: "/images/schools/kmo-logo.svg",
       primary_color: "#4338ca",
       secondary_color: "#ec4899",
       delivery_charge: 7500, // ₹75

@@ -21,8 +21,9 @@ import {
   ExternalLink,
   MapPin,
   ChevronRight,
-  Sparkles,
+  Settings,
 } from "lucide-react";
+import { SchoolAvatar } from "@/components/common/SchoolAvatar";
 
 export default function SchoolDashboardPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -137,15 +138,7 @@ export default function SchoolDashboardPage() {
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-start md:items-center gap-4">
-            <div
-              className="w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center text-xl md:text-2xl font-black shadow-inner border border-white/20 shrink-0"
-              style={{
-                backgroundColor: schoolData?.primary_color || "#1e3a8a",
-                color: "#ffffff",
-              }}
-            >
-              {schoolData?.code || "SCH"}
-            </div>
+            <SchoolAvatar school={schoolData} className="w-14 h-14 md:w-16 md:h-16" />
 
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2">
@@ -193,6 +186,15 @@ export default function SchoolDashboardPage() {
               >
                 <FileText className="w-4 h-4 text-slate-400" />
                 <span>Packing Manifest</span>
+              </Button>
+            </Link>
+            <Link href="/school/settings">
+              <Button
+                variant="outline"
+                className="bg-white/5 hover:bg-white/10 border-white/10 text-slate-200 font-semibold text-xs h-10 px-4 rounded-xl cursor-pointer flex items-center gap-2"
+              >
+                <Settings className="w-4 h-4 text-slate-400" />
+                <span>Store Settings</span>
               </Button>
             </Link>
           </div>
@@ -403,6 +405,7 @@ export default function SchoolDashboardPage() {
                 </div>
                 <div className="flex items-center justify-between gap-2 pt-1">
                   <span className="font-mono font-bold text-emerald-400 text-sm">{formatPaiseToRupees(ord.grand_total)}</span>
+                  {!["delivered", "cancelled"].includes(ord.order_status) && (
                   <Button
                     size="sm"
                     onClick={() => handleOpenUpdateModal(ord)}
@@ -410,89 +413,97 @@ export default function SchoolDashboardPage() {
                   >
                     Fulfill
                   </Button>
+                  )}
                 </div>
               </div>
             ))}
           </div>
           <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-700/60">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-900/80 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-700/60">
+            <table className="w-full text-left text-xs table-fixed">
+              <thead className="bg-slate-900/90 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-700/60">
                 <tr>
-                  <th className="p-3.5">Order No</th>
-                  <th className="p-3.5">Student / Class</th>
-                  <th className="p-3.5">Items & Sizes</th>
-                  <th className="p-3.5">Total</th>
-                  <th className="p-3.5">Status</th>
-                  <th className="p-3.5 text-right">Quick Action</th>
+                  <th className="p-3.5 w-32">Order No</th>
+                  <th className="p-3.5 w-44">Student / Class</th>
+                  <th className="p-3.5">Items &amp; Sizes</th>
+                  <th className="p-3.5 w-24">Total</th>
+                  <th className="p-3.5 w-36 text-center">Status</th>
+                  <th className="p-3.5 w-32 text-right">Quick Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700/40 text-slate-200">
-                {orders.slice(0, 8).map((ord) => (
-                  <tr key={ord.id} className="hover:bg-slate-700/30 transition-colors">
-                    <td className="p-3.5 font-mono font-bold text-white">
-                      <div>#{ord.order_no}</div>
-                      <div className="text-[10px] text-slate-400 font-normal">
-                        {new Date(ord.createdAt).toLocaleDateString("en-IN")}
-                      </div>
-                    </td>
-                    <td className="p-3.5">
-                      <div className="font-bold text-white">{ord.student.name}</div>
-                      <div className="text-slate-400 text-[11px]">
-                        Class {ord.student.class} {ord.student.section ? `• ${ord.student.section}` : ""}
-                      </div>
-                    </td>
-                    <td className="p-3.5">
-                      <div className="space-y-0.5">
-                        {ord.items.map((it: any) => (
-                          <div key={it.id} className="text-[11px] text-slate-300">
-                            <span className="font-bold text-white">{it.qty}x</span> {it.item_name} (Size {it.size})
-                          </div>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="p-3.5 font-mono font-bold text-emerald-400">
-                      {formatPaiseToRupees(ord.grand_total)}
-                    </td>
-                    <td className="p-3.5">
-                      <Badge
-                        variant={
-                          ord.order_status === "delivered"
-                            ? "success"
-                            : ord.order_status === "packed"
-                            ? "warning"
-                            : ord.order_status === "out_for_delivery"
-                            ? "brand"
-                            : "neutral"
-                        }
-                      >
-                        {ord.order_status.replace(/_/g, " ")}
-                      </Badge>
-                    </td>
-                    <td className="p-3.5 text-right whitespace-nowrap">
-                      <div className="inline-flex items-center justify-end gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleOpenUpdateModal(ord)}
-                          className="text-xs bg-blue-600 hover:bg-blue-500 text-white font-bold h-7 px-3 rounded-lg cursor-pointer"
+                {orders.slice(0, 8).map((ord) => {
+                  const statusColors: Record<string, { bg: string; dot: string; text: string; border: string }> = {
+                    delivered: { bg: "bg-emerald-500/15", dot: "bg-emerald-400", text: "text-emerald-300", border: "border-emerald-500/30" },
+                    out_for_delivery: { bg: "bg-sky-500/15", dot: "bg-sky-400", text: "text-sky-300", border: "border-sky-500/30" },
+                    packed: { bg: "bg-amber-500/15", dot: "bg-amber-400", text: "text-amber-300", border: "border-amber-500/30" },
+                    cancelled: { bg: "bg-rose-500/15", dot: "bg-rose-400", text: "text-rose-300", border: "border-rose-500/30" },
+                    placed: { bg: "bg-slate-700/50", dot: "bg-slate-400", text: "text-slate-300", border: "border-slate-600/80" },
+                    confirmed: { bg: "bg-blue-500/15", dot: "bg-blue-400", text: "text-blue-300", border: "border-blue-500/30" },
+                  };
+                  const statusStyle = statusColors[ord.order_status] || statusColors.placed;
+
+                  return (
+                    <tr key={ord.id} className="hover:bg-slate-700/30 transition-colors">
+                      <td className="p-3.5 font-mono font-bold text-white align-middle">
+                        <div>#{ord.order_no}</div>
+                        <div className="text-[10px] text-slate-400 font-normal">
+                          {new Date(ord.createdAt).toLocaleDateString("en-IN")}
+                        </div>
+                      </td>
+                      <td className="p-3.5 align-middle">
+                        <div className="font-bold text-white truncate">{ord.student.name}</div>
+                        <div className="text-slate-400 text-[11px]">
+                          Class {ord.student.class} {ord.student.section ? `• ${ord.student.section}` : ""}
+                        </div>
+                      </td>
+                      <td className="p-3.5 align-middle">
+                        <div className="space-y-0.5 max-w-sm">
+                          {ord.items.map((it: any) => (
+                            <div key={it.id} className="text-[11px] text-slate-300 truncate">
+                              <span className="font-bold text-white">{it.qty}x</span> {it.item_name} (Size {it.size})
+                            </div>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="p-3.5 font-mono font-bold text-emerald-400 align-middle whitespace-nowrap">
+                        {formatPaiseToRupees(ord.grand_total)}
+                      </td>
+                      <td className="p-3.5 text-center align-middle whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border w-28 mx-auto ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}
                         >
-                          Fulfill
-                        </Button>
-                        {ord.tracking_token && (
-                          <Link href={`/t/${ord.tracking_token}`} target="_blank">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="w-7 h-7 p-0 rounded-lg border-slate-700 bg-slate-900/60 hover:bg-slate-700 text-slate-300 flex items-center justify-center cursor-pointer"
-                              title="Parent Live Tracking View"
-                            >
-                              <ExternalLink className="w-3.5 h-3.5" />
-                            </Button>
-                          </Link>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot}`} />
+                          <span className="capitalize">{ord.order_status.replace(/_/g, " ")}</span>
+                        </span>
+                      </td>
+                      <td className="p-3.5 text-right whitespace-nowrap align-middle">
+                        <div className="inline-flex items-center justify-end gap-1.5">
+                          {!["delivered", "cancelled"].includes(ord.order_status) && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleOpenUpdateModal(ord)}
+                            className="text-xs bg-blue-600 hover:bg-blue-500 text-white font-bold h-7 px-3 rounded-lg cursor-pointer transition-transform active:scale-95"
+                          >
+                            Fulfill
+                          </Button>
+                          )}
+                          {ord.tracking_token && (
+                            <Link href={`/t/${ord.tracking_token}`} target="_blank">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="w-7 h-7 p-0 rounded-lg border-slate-700 bg-slate-900/60 hover:bg-slate-700 text-slate-300 flex items-center justify-center cursor-pointer transition-colors"
+                                title="Parent Live Tracking View"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                              </Button>
+                            </Link>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

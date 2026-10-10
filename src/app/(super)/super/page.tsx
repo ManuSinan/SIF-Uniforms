@@ -257,14 +257,14 @@ export default function SuperDashboardPage() {
               <div className="absolute -top-1.5 left-3 right-3 h-10 bg-white/15 backdrop-blur-md border border-white/20 rounded-3xl shadow-md" />
 
               {/* Main Front Glass Card */}
-              <div className="relative bg-gradient-to-br from-white/25 via-white/15 to-white/10 backdrop-blur-xl border border-white/30 rounded-3xl p-7 text-white shadow-2xl shadow-blue-950/40">
-                <div className="flex items-center justify-between text-xs font-semibold text-blue-100/90 tracking-wider">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-sm">{schools.length} Partner Schools</span>
+              <div className="relative bg-gradient-to-br from-white/25 via-white/15 to-white/10 backdrop-blur-xl border border-white/30 rounded-3xl p-5 sm:p-7 text-white shadow-2xl shadow-blue-950/40">
+                <div className="flex items-center justify-between gap-3 text-xs font-semibold text-blue-100/90 tracking-wider">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 min-w-0">
+                    <span className="font-mono text-sm whitespace-nowrap">{schools.length} Partner Schools</span>
                     <span>&bull;</span>
-                    <span>Active Cycle</span>
+                    <span className="whitespace-nowrap">Active Cycle</span>
                   </div>
-                  <div className="font-black text-sm tracking-tight text-white">SIF GMV</div>
+                  <div className="font-black text-sm tracking-tight text-white whitespace-nowrap shrink-0">SIF GMV</div>
                 </div>
 
                 {/* Amount */}

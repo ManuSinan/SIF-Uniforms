@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { PwaRegister } from "@/components/pwa/PwaRegister";
+import { PwaInstallPrompt } from "@/components/pwa/PwaInstallPrompt";
 
 export const metadata: Metadata = {
   title: "SIF UNIFORMS - Multi-School Uniform Platform",
@@ -40,6 +41,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col text-slate-900 bg-slate-50 font-sans">
         <PwaRegister />
+        <PwaInstallPrompt />
         {children}
       </body>
     </html>

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <linearGradient id="mr-navy" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <linearGradient id="mr-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <linearGradient id="mr-emerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <filter id="mr-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Outer Ring with Gold Trim -->
+  <circle cx="100" cy="100" r="94" fill="#ffffff" stroke="url(#mr-gold)" stroke-width="4.5" filter="url(#mr-shadow)" />
+  <circle cx="100" cy="100" r="86" fill="none" stroke="#059669" stroke-width="1.5" stroke-dasharray="4,2" />
+
+  <!-- Inner Octagon / Star Shield -->
+  <polygon points="100,48 138,64 154,102 138,140 100,154 62,140 46,102 62,64" fill="url(#mr-navy)" stroke="url(#mr-gold)" stroke-width="2.5" />
+
+  <!-- Crescent & Radiant Star of Knowledge -->
+  <path d="M 92 68 A 18 18 0 1 0 114 98 A 15 15 0 1 1 92 68 Z" fill="url(#mr-gold)" />
+  <polygon points="112,74 114,79 119,79 115,82 117,87 112,84 107,87 109,82 105,79 110,79" fill="#ffffff" />
+
+  <!-- Open Book & Fountain Pen -->
+  <path d="M 80 110 Q 100 104 100 114 Q 100 104 120 110 L 118 126 Q 100 120 100 130 Q 100 120 82 126 Z" fill="#ffffff" stroke="url(#mr-gold)" stroke-width="1.2" />
+  <path d="M 100 98 L 98 114 L 102 114 Z" fill="url(#mr-emerald)" />
+
+  <!-- Header Text -->
+  <text x="100" y="30" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="9" fill="#0f172a" letter-spacing="1.5">MARKAZ RESIDENTIAL</text>
+  <text x="100" y="42" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="7" fill="#059669" letter-spacing="1">KARANTHUR &#8226; KOZHIKODE</text>
+
+  <!-- Bottom Ribbon -->
+  <path d="M 38 156 Q 100 170 162 156 L 158 172 Q 100 186 42 172 Z" fill="url(#mr-emerald)" stroke="url(#mr-gold)" stroke-width="1.5"/>
+  <text x="100" y="166" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="7.5" fill="#ffffff" letter-spacing="1.2">FAITH &#8226; KNOWLEDGE &#8226; SERVICE</text>
+</svg>

@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   RefreshCw,
   Sparkles,
+  Pencil,
 } from "lucide-react";
 
 export default function CheckoutPage() {
@@ -40,6 +41,19 @@ export default function CheckoutPage() {
   const [addrError, setAddrError] = useState("");
   const [addrLandmark, setAddrLandmark] = useState("");
   const [savingAddr, setSavingAddr] = useState(false);
+
+  // Edit Address modal/form state
+  const [showEditAddress, setShowEditAddress] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState<number | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editLine1, setEditLine1] = useState("");
+  const [editLine2, setEditLine2] = useState("");
+  const [editCity, setEditCity] = useState("");
+  const [editPincode, setEditPincode] = useState("");
+  const [editError, setEditError] = useState("");
+  const [editLandmark, setEditLandmark] = useState("");
+  const [savingEditAddr, setSavingEditAddr] = useState(false);
 
   useEffect(() => {
     loadCheckoutData();
@@ -78,6 +92,58 @@ export default function CheckoutPage() {
     }
   };
 
+  const handleOpenEditAddress = (addr: any) => {
+    setEditingAddressId(addr.id);
+    setEditName(addr.name || "");
+    setEditPhone(addr.phone || "");
+    setEditLine1(addr.line1 || "");
+    setEditLine2(addr.line2 || "");
+    setEditCity(addr.city || "");
+    setEditPincode(addr.pincode || "");
+    setEditLandmark(addr.landmark || "");
+    setEditError("");
+    setShowEditAddress(true);
+  };
+
+  const handleUpdateAddress = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAddressId || !editName || !editPhone || !editLine1 || !editPincode) return;
+
+    setEditError("");
+    setSavingEditAddr(true);
+    try {
+      const res = await fetch(`/api/addresses/${editingAddressId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editName,
+          phone: editPhone,
+          line1: editLine1,
+          line2: editLine2,
+          city: editCity,
+          pincode: editPincode,
+          landmark: editLandmark,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success && data.address) {
+        setShowEditAddress(false);
+        setAddresses((prev) =>
+          prev.map((a) => (a.id === data.address.id ? data.address : a))
+        );
+        setSelectedAddressId(data.address.id);
+      } else {
+        setEditError(data.error || "Couldn't update this address");
+      }
+    } catch (err) {
+      console.error(err);
+      setEditError("Failed to update address");
+    } finally {
+      setSavingEditAddr(false);
+    }
+  };
+
   const handleSaveAddress = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!addrName || !addrPhone || !addrLine1 || !addrPincode) return;
@@ -103,6 +169,13 @@ export default function CheckoutPage() {
       const data = await res.json();
       if (data.success) {
         setShowAddAddress(false);
+        setAddrName("");
+        setAddrPhone("");
+        setAddrLine1("");
+        setAddrLine2("");
+        setAddrCity("");
+        setAddrPincode("");
+        setAddrLandmark("");
         setSelectedAddressId(data.address.id);
         await loadCheckoutData();
       } else {
@@ -230,6 +303,21 @@ export default function CheckoutPage() {
           </div>
         )}
 
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-3 text-slate-400">
+            <RefreshCw className="w-6 h-6 animate-spin" />
+            <p className="text-sm font-medium">Loading your bag...</p>
+          </div>
+        ) : items.length === 0 ? (
+          <Card className="p-8 bg-white border-slate-200 text-center space-y-3">
+            <h2 className="text-base font-bold text-slate-900">Your bag is empty</h2>
+            <p className="text-sm text-slate-500">Add uniform items to your bag before checking out.</p>
+            <Link href="/parent" className="inline-block">
+              <Button className="mt-2">Browse uniforms</Button>
+            </Link>
+          </Card>
+        ) : (
+        <>
         {/* Step 1: Delivery Address */}
         <Card className="p-5 bg-white border-slate-200 space-y-4">
           <div className="flex items-center justify-between">
@@ -270,7 +358,21 @@ export default function CheckoutPage() {
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-bold text-xs text-slate-900">{addr.name}</span>
-                    <span className="text-[11px] text-slate-500 font-mono">{addr.phone}</span>
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-[11px] text-slate-500 font-mono">{addr.phone}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenEditAddress(addr);
+                        }}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 hover:text-blue-900 hover:bg-blue-100/80 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-lg transition-colors"
+                        title="Edit this address"
+                      >
+                        <Pencil className="w-3 h-3" />
+                        Edit
+                      </button>
+                    </div>
                   </div>
                   <p className="text-sm text-slate-600">
                     {addr.line1}
@@ -368,6 +470,128 @@ export default function CheckoutPage() {
             )}
           </Button>
         </Card>
+        </>
+        )}
+
+        {/* Edit Address Modal */}
+        {showEditAddress && (
+          <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-end sm:items-center justify-center sm:p-4">
+            <Card className="w-full max-w-md bg-white p-5 sm:p-6 pb-8 shadow-2xl border-slate-200 rounded-b-none sm:rounded-b-2xl max-h-[92vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-slate-900 text-base">Edit Delivery Address</h3>
+                <button
+                  type="button"
+                  aria-label="Close"
+                  onClick={() => setShowEditAddress(false)}
+                  className="w-11 text-slate-400 hover:text-slate-600 font-bold text-2xl"
+                >
+                  &times;
+                </button>
+              </div>
+
+              <form onSubmit={handleUpdateAddress} className="space-y-3 text-xs">
+                {editError && (
+                  <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl">{editError}</div>
+                )}
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Contact Person Name</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Ramesh Sharma"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="w-full px-3 py-2 text-base rounded-xl border border-slate-300 focus:border-blue-700 outline-hidden font-medium"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Mobile Phone</label>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel-national"
+                    required
+                    maxLength={10}
+                    placeholder="9876543210"
+                    value={editPhone}
+                    onChange={(e) => setEditPhone(e.target.value)}
+                    className="w-full px-3 py-2 text-base rounded-xl border border-slate-300 focus:border-blue-700 outline-hidden font-medium font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Address Line 1</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="House / Flat No, Apartment Name, Street"
+                    value={editLine1}
+                    onChange={(e) => setEditLine1(e.target.value)}
+                    className="w-full px-3 py-2 text-base rounded-xl border border-slate-300 focus:border-blue-700 outline-hidden font-medium"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Address Line 2 (Optional)</label>
+                  <input
+                    type="text"
+                    placeholder="Area, Landmark or building"
+                    value={editLine2}
+                    onChange={(e) => setEditLine2(e.target.value)}
+                    className="w-full px-3 py-2 text-base rounded-xl border border-slate-300 focus:border-blue-700 outline-hidden font-medium"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">City</label>
+                    <input
+                      type="text"
+                      required
+                      value={editCity}
+                      onChange={(e) => setEditCity(e.target.value)}
+                      className="w-full px-3 py-2 text-base rounded-xl border border-slate-300 focus:border-blue-700 outline-hidden font-medium"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">Pincode</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="postal-code"
+                      pattern="[0-9]{6}"
+                      required
+                      maxLength={6}
+                      value={editPincode}
+                      onChange={(e) => setEditPincode(e.target.value)}
+                      className="w-full px-3 py-2 text-base rounded-xl border border-slate-300 focus:border-blue-700 outline-hidden font-medium font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-3 flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowEditAddress(false)}
+                    className="w-1/2"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={savingEditAddr}
+                    className="w-1/2 bg-blue-900 text-white font-bold"
+                  >
+                    {savingEditAddr ? "Saving..." : "Update Address"}
+                  </Button>
+                </div>
+              </form>
+            </Card>
+          </div>
+        )}
 
         {/* New Address Modal */}
         {showAddAddress && (
@@ -424,6 +648,17 @@ export default function CheckoutPage() {
                     placeholder="House / Flat No, Apartment Name, Street"
                     value={addrLine1}
                     onChange={(e) => setAddrLine1(e.target.value)}
+                    className="w-full px-3 py-2 text-base rounded-xl border border-slate-300 focus:border-blue-700 outline-hidden font-medium"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Address Line 2 (Optional)</label>
+                  <input
+                    type="text"
+                    placeholder="Area, Landmark or building"
+                    value={addrLine2}
+                    onChange={(e) => setAddrLine2(e.target.value)}
                     className="w-full px-3 py-2 text-base rounded-xl border border-slate-300 focus:border-blue-700 outline-hidden font-medium"
                   />
                 </div>

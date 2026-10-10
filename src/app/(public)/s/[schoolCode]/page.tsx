@@ -12,12 +12,12 @@ import {
   Truck,
   ShieldCheck,
   ArrowRight,
-  Sparkles,
   Shirt,
   Info,
   ChevronLeft,
 } from "lucide-react";
 import prisma from "@/lib/db/prisma";
+import { SchoolAvatar } from "@/components/common/SchoolAvatar";
 
 interface PageProps {
   params: Promise<{ schoolCode: string }>;
@@ -44,10 +44,18 @@ export default async function SchoolStorePage({ params }: PageProps) {
     notFound();
   }
 
+  let resolvedLogo = dbSchool.logo_url;
+  if (resolvedLogo && resolvedLogo.includes("/images/schools/") && resolvedLogo.endsWith(".jpg")) {
+    resolvedLogo = resolvedLogo.replace(/\.jpg$/, ".svg");
+  }
+  if (!resolvedLogo) {
+    resolvedLogo = `/images/schools/${dbSchool.code.toLowerCase()}-logo.svg`;
+  }
+
   const schoolData = {
     name: dbSchool.name,
     code: dbSchool.code,
-    logo_url: dbSchool.logo_url,
+    logo_url: resolvedLogo,
     primary_color: dbSchool.primary_color,
     secondary_color: dbSchool.secondary_color,
     delivery_charge: dbSchool.delivery_charge,
@@ -80,19 +88,7 @@ export default async function SchoolStorePage({ params }: PageProps) {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-white p-1 flex items-center justify-center shrink-0 shadow-md overflow-hidden">
-                  {schoolData.logo_url ? (
-                    <img
-                      src={schoolData.logo_url}
-                      alt={schoolData.name}
-                      className="w-full h-full object-contain rounded-xl"
-                    />
-                  ) : (
-                    <span className="text-2xl font-black text-slate-900">
-                      {schoolData.name.charAt(0)}
-                    </span>
-                  )}
-                </div>
+                <SchoolAvatar school={schoolData} className="w-16 h-16" />
 
                 <div>
                   <div className="flex items-center gap-2 mb-1">

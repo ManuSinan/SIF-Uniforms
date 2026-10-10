@@ -16,6 +16,7 @@ import {
   LogOut,
   Shirt,
   GraduationCap,
+  Settings,
   X,
 } from "lucide-react";
 import { clsx } from "clsx";
@@ -56,6 +57,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     { href: "/school/orders", label: "Orders", icon: ShoppingCart },
     { href: "/school/change-requests", label: "Change Requests", icon: MessageSquare },
     { href: "/school/reports", label: "Packing Reports", icon: FileText },
+    { href: "/school/settings", label: "Store Settings", icon: Settings },
   ];
 
   const links = role === "super_admin" ? superLinks : schoolLinks;

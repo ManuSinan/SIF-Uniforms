@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -14,18 +14,23 @@ import {
   Sparkles,
   ChevronRight,
   ExternalLink,
+  X,
+  School as SchoolIcon,
+  MapPin,
 } from "lucide-react";
 
 // Pre-defined list of featured schools matching reference mockup
 const FEATURED_SCHOOLS = [
   {
     code: "SXHS",
-    name: "SXHS",
+    name: "St. Xavier's High School",
     fullName: "St. Xavier's High School",
+    address: "Church Street, Richmond Town, Bengaluru",
+    city: "Bengaluru",
     productsCount: "24 Products",
     primaryColor: "#1e3a8a",
-    logoText: "SX",
-    logoImage: "/images/schools/sxhs-logo.jpg",
+    logoText: "S",
+    logoImage: null,
     itemsPreview: [
       { name: "Sky Blue Shirt", img: "/images/uniforms/sky-blue-shirt.jpg" },
       { name: "Navy Tie", img: "/images/uniforms/navy-tie.jpg" },
@@ -34,12 +39,14 @@ const FEATURED_SCHOOLS = [
   },
   {
     code: "GWIS",
-    name: "GWIS",
-    fullName: "Greenwood International",
+    name: "Greenwood International School",
+    fullName: "Greenwood International School",
+    address: "Varthur Sarjapur Road, Gunjur, Bengaluru",
+    city: "Bengaluru",
     productsCount: "18 Products",
     primaryColor: "#065f46",
-    logoText: "GW",
-    logoImage: "/images/schools/gwis-logo.jpg",
+    logoText: "G",
+    logoImage: null,
     itemsPreview: [
       { name: "Formal Vest", img: "/images/uniforms/green-shirt.jpg" },
       { name: "Navy Shorts", img: "/images/uniforms/navy-shorts.jpg" },
@@ -47,11 +54,14 @@ const FEATURED_SCHOOLS = [
   },
   {
     code: "MES",
-    name: "MES School",
-    fullName: "MES Higher Secondary",
+    name: "MES Higher Secondary School",
+    fullName: "MES Higher Secondary School",
+    address: "15th Cross, Malleshwaram, Bengaluru",
+    city: "Bengaluru",
     productsCount: "31 Products",
-    primaryColor: "#047857",
-    logoText: "MES",
+    primaryColor: "#0f766e",
+    logoText: "M",
+    logoImage: null,
     itemsPreview: [
       { name: "Green Shirt", img: "/images/uniforms/green-shirt.jpg" },
       { name: "Green Skirt", img: "/images/uniforms/green-skirt.jpg" },
@@ -59,42 +69,86 @@ const FEATURED_SCHOOLS = [
   },
   {
     code: "JDT",
-    name: "JDT Iqraa",
+    name: "JDT Iqraa English School",
     fullName: "JDT Iqraa English School",
+    address: "Calicut Bypass Road, Kozhikode, Kerala",
+    city: "Kozhikode",
     productsCount: "22 Products",
     primaryColor: "#991b1b",
-    logoText: "JDT",
+    logoText: "J",
+    logoImage: null,
     itemsPreview: [
       { name: "Beige Shirt", img: "/images/uniforms/sky-blue-shirt.jpg" },
       { name: "Brown Skirt", img: "/images/uniforms/green-skirt.jpg" },
     ],
   },
   {
-    code: "MARKAZ",
-    name: "Markaz School",
+    code: "MR",
+    name: "Markaz Residential School",
     fullName: "Markaz Residential School",
+    address: "Karanthur, Kozhikode, Kerala",
+    city: "Kozhikode",
     productsCount: "28 Products",
-    primaryColor: "#15803d",
-    logoText: "MR",
+    primaryColor: "#1e293b",
+    logoText: "M",
+    logoImage: null,
     itemsPreview: [
       { name: "White Shirt", img: "/images/uniforms/sky-blue-shirt.jpg" },
       { name: "Navy Tie", img: "/images/uniforms/navy-tie.jpg" },
-      { name: "Navy Pants", img: "/images/uniforms/navy-shorts.jpg" },
+      { name: "Navy Shorts", img: "/images/uniforms/navy-shorts.jpg" },
     ],
   },
   {
     code: "KMO",
-    name: "KMO School",
+    name: "KMO Higher Secondary School",
     fullName: "KMO Higher Secondary School",
+    address: "Koduvally, Kozhikode, Kerala",
+    city: "Kozhikode",
     productsCount: "19 Products",
-    primaryColor: "#0284c7",
-    logoText: "KMO",
+    primaryColor: "#4338ca",
+    logoText: "K",
+    logoImage: null,
     itemsPreview: [
       { name: "Sports T-Shirt", img: "/images/uniforms/sports-tshirt.jpg" },
       { name: "Navy Shorts", img: "/images/uniforms/navy-shorts.jpg" },
     ],
   },
+  {
+    code: "OIA3032",
+    name: "Oxford International Academy",
+    fullName: "Oxford International Academy",
+    address: "Oxford Hill Road, Sector 4, Bengaluru",
+    city: "Bengaluru",
+    productsCount: "26 Products",
+    primaryColor: "#881337",
+    logoText: "O",
+    logoImage: null,
+    itemsPreview: [],
+  },
+  {
+    code: "OIA644",
+    name: "Oxford International Academy 644",
+    fullName: "Oxford International Academy 644",
+    address: "Oxford Hill Road, Sector 4, Bengaluru",
+    city: "Bengaluru",
+    productsCount: "20 Products",
+    primaryColor: "#881337",
+    logoText: "O",
+    logoImage: null,
+    itemsPreview: [],
+  },
 ];
+
+import { SchoolAvatar } from "@/components/common/SchoolAvatar";
+
+// Helper to determine city from address string
+function extractCity(address?: string | null): string {
+  if (!address) return "Other";
+  const lower = address.toLowerCase();
+  if (lower.includes("bengaluru") || lower.includes("bangalore")) return "Bengaluru";
+  if (lower.includes("kozhikode") || lower.includes("calicut") || lower.includes("kerala")) return "Kozhikode";
+  return "Other";
+}
 
 export default function HomePage() {
   const router = useRouter();
@@ -103,6 +157,8 @@ export default function HomePage() {
   const [searchError, setSearchError] = useState("");
   const [trackingToken, setTrackingToken] = useState("");
   const [activeNav, setActiveNav] = useState<"home" | "schools" | "how" | "track">("home");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch("/api/schools")
@@ -115,29 +171,114 @@ export default function HomePage() {
       .catch((err) => console.error("Failed to load schools:", err));
   }, []);
 
+  // Close search suggestions on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(e.target as Node)
+      ) {
+        setIsSearchFocused(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Normalize schools list with full details & guaranteed unique fallback logos
+  const allSchoolsList = useMemo(() => {
+    if (schools.length > 0) {
+      return schools.map((s) => {
+        const codeUpper = (s.code || "").toUpperCase();
+        const fallback = FEATURED_SCHOOLS.find(
+          (f) => f.code.toUpperCase() === codeUpper || f.code.toUpperCase() === codeUpper.replace(/\d+/g, "")
+        );
+        const logoImage = s.logo_url || fallback?.logoImage || null;
+        const address = s.address || fallback?.address || "";
+        const city = extractCity(address) || fallback?.city || "Other";
+        return {
+          code: s.code,
+          name: s.name,
+          fullName: s.name || fallback?.fullName,
+          address,
+          city,
+          primaryColor: s.primary_color || fallback?.primaryColor || "#1e3a8a",
+          logoImage,
+          logoText: s.code?.slice(0, 3).toUpperCase(),
+          productsCount: s._count
+            ? `${s._count.schoolProducts} Uniform Items`
+            : fallback?.productsCount || "Uniform Store",
+        };
+      });
+    }
+    return FEATURED_SCHOOLS;
+  }, [schools]);
+
+  // Live autocomplete search suggestions for Hero bar
+  const liveSuggestions = useMemo(() => {
+    const query = searchCode.trim().toLowerCase();
+    if (!query) return [];
+
+    return allSchoolsList.filter((s) => {
+      const nameMatch = s.name.toLowerCase().includes(query);
+      const codeMatch = s.code.toLowerCase().includes(query);
+      const fullNameMatch = s.fullName && s.fullName.toLowerCase().includes(query);
+      const addressMatch = s.address && s.address.toLowerCase().includes(query);
+      return nameMatch || codeMatch || fullNameMatch || addressMatch;
+    });
+  }, [searchCode, allSchoolsList]);
+
+
+
   const handleSchoolSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const query = searchCode.trim().toUpperCase();
+    const query = searchCode.trim();
     if (!query) return;
 
-    // Check DB schools or featured list
-    const matched =
-      schools.find(
-        (s) => s.code.toUpperCase() === query || s.name.toLowerCase().includes(query.toLowerCase())
-      ) ||
-      FEATURED_SCHOOLS.find(
-        (s) => s.code.toUpperCase() === query || s.name.toLowerCase().includes(query.toLowerCase())
-      );
+    const qLower = query.toLowerCase();
 
-    if (matched) {
+    // 1. Direct exact code match
+    const exactCodeMatch = allSchoolsList.find(
+      (s) => s.code.toLowerCase() === qLower
+    );
+    if (exactCodeMatch) {
       setSearchError("");
-      router.push(`/s/${matched.code.toLowerCase()}`);
-    } else {
-      setSearchError(`No school found for "${query}". Try code SXHS or GWIS.`);
+      setIsSearchFocused(false);
+      router.push(`/s/${exactCodeMatch.code.toLowerCase()}`);
+      return;
     }
+
+    // 2. Direct name match (exact or single close match)
+    const matches = allSchoolsList.filter(
+      (s) =>
+        s.name.toLowerCase().includes(qLower) ||
+        s.code.toLowerCase().includes(qLower) ||
+        (s.fullName && s.fullName.toLowerCase().includes(qLower)) ||
+        (s.address && s.address.toLowerCase().includes(qLower))
+    );
+
+    if (matches.length === 1) {
+      setSearchError("");
+      setIsSearchFocused(false);
+      router.push(`/s/${matches[0].code.toLowerCase()}`);
+      return;
+    }
+
+    if (matches.length > 1) {
+      setSearchError("");
+      setIsSearchFocused(false);
+      const el = document.getElementById("schools-section");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+      return;
+    }
+
+    setSearchError(`No school found for "${query}". Please check the name or try "Xavier", "Greenwood", or "MES".`);
   };
 
   const handleQuickSchoolClick = (code: string) => {
+    setIsSearchFocused(false);
     router.push(`/s/${code.toLowerCase()}`);
   };
 
@@ -280,8 +421,8 @@ export default function HomePage() {
                 size, and get everything delivered to your doorstep.
               </p>
 
-              {/* Search Box */}
-              <div className="pt-1 max-w-lg space-y-3">
+              {/* Search Box with Autocomplete Dropdown */}
+              <div ref={searchContainerRef} className="relative pt-1 max-w-lg space-y-3">
                 <form
                   onSubmit={handleSchoolSearch}
                   className="relative flex items-center bg-white rounded-full border border-slate-200 shadow-xl shadow-black/15 lg:shadow-md lg:shadow-slate-200/50 p-1.5 pl-3.5 sm:pl-5 transition-all focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-400/30"
@@ -289,14 +430,28 @@ export default function HomePage() {
                   <Search className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 shrink-0 mr-2 sm:mr-3" />
                   <input
                     type="text"
-                    placeholder="Enter School Code"
+                    placeholder="Search by school name (e.g. Xavier, Greenwood) or code..."
                     value={searchCode}
+                    onFocus={() => setIsSearchFocused(true)}
                     onChange={(e) => {
                       setSearchCode(e.target.value);
+                      setIsSearchFocused(true);
                       setSearchError("");
                     }}
                     className="w-full text-xs sm:text-sm font-medium text-slate-900 placeholder-slate-400 bg-transparent outline-none pr-2 min-w-0"
                   />
+                  {searchCode && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchCode("");
+                        setSearchError("");
+                      }}
+                      className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 mr-1 cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                   <button
                     type="submit"
                     className="px-5 sm:px-7 py-2 sm:py-2.5 bg-[#0c2461] hover:bg-[#081a46] text-white font-bold text-xs sm:text-sm rounded-full transition-all shadow-sm shrink-0 cursor-pointer"
@@ -304,6 +459,59 @@ export default function HomePage() {
                     Search
                   </button>
                 </form>
+
+                {/* Live Autocomplete Suggestions Dropdown */}
+                {isSearchFocused && searchCode.trim().length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-3xl shadow-2xl border border-slate-200/90 overflow-hidden z-50 divide-y divide-slate-100 animate-in fade-in slide-in-from-top-2">
+                    <div className="p-3 bg-slate-50/80 flex items-center justify-between text-[11px] font-bold text-slate-500">
+                      <span>Matching Schools ({liveSuggestions.length})</span>
+                      <span className="text-[10px] text-slate-400">Press Enter or select below</span>
+                    </div>
+
+                    <div className="max-h-64 overflow-y-auto">
+                      {liveSuggestions.length === 0 ? (
+                        <div className="p-6 text-center text-slate-400 text-xs">
+                          <SchoolIcon className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                          <p className="font-semibold text-slate-700">No matching schools found</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">Try searching &quot;Xavier&quot;, &quot;Greenwood&quot;, &quot;MES&quot;, or &quot;Markaz&quot;</p>
+                        </div>
+                      ) : (
+                        liveSuggestions.map((sch) => (
+                          <div
+                            key={sch.code}
+                            onClick={() => handleQuickSchoolClick(sch.code)}
+                            className="p-3.5 hover:bg-blue-50/80 flex items-center justify-between gap-3 cursor-pointer transition-colors group"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <SchoolAvatar school={sch} className="w-10 h-10" />
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <h4 className="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-blue-900 transition-colors truncate">
+                                    {sch.fullName || sch.name}
+                                  </h4>
+                                  <span className="px-1.5 py-0.5 text-[10px] font-mono font-bold rounded-md bg-blue-100 text-blue-800">
+                                    {sch.code}
+                                  </span>
+                                </div>
+                                {sch.address && (
+                                  <p className="text-[11px] text-slate-400 truncate flex items-center gap-1 mt-0.5">
+                                    <MapPin className="w-3 h-3 shrink-0" />
+                                    <span>{sch.address}</span>
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            <span className="text-xs font-bold text-blue-600 group-hover:text-blue-800 flex items-center gap-1 shrink-0">
+                              <span>Open Store</span>
+                              <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                            </span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {searchError && (
                   <p className="text-xs font-semibold text-rose-300 lg:text-rose-600 pl-3">{searchError}</p>
@@ -320,81 +528,77 @@ export default function HomePage() {
       {/* ========================================================================= */}
       {/* 2. PARTNER SCHOOLS / SELECT YOUR INSTITUTION                              */}
       {/* ========================================================================= */}
-      <section id="schools-section" className="py-12 sm:py-16 max-w-6xl mx-auto px-4 sm:px-6 w-full">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-3">
+      {/* ========================================================================= */}
+      {/* 2. PARTNER SCHOOLS / SELECT YOUR INSTITUTION                              */}
+      {/* ========================================================================= */}
+      <section id="schools-section" className="py-10 sm:py-14 max-w-6xl mx-auto px-4 sm:px-6 w-full scroll-mt-6">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <span className="text-xs font-bold text-blue-800 uppercase tracking-wider block mb-1">
-              Select Your Institution
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
-              Partner Schools
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Tap on your school to browse official approved uniforms and size guides.
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
+                Partner Schools
+              </h2>
+              <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-900 font-bold text-xs border border-blue-100">
+                {allSchoolsList.length} Schools
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Select your institution to view official uniforms and sizing.
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {(schools.length > 0
-            ? schools.map((s) => ({
-                code: s.code,
-                name: s.name,
-                fullName: s.name,
-                primaryColor: s.primary_color || "#1e3a8a",
-                logoImage: s.logo_url || FEATURED_SCHOOLS.find((f) => f.code.toUpperCase() === s.code.toUpperCase())?.logoImage,
-                logoText: s.code.slice(0, 3).toUpperCase(),
-                productsCount: s._count?.schoolProducts ? `${s._count.schoolProducts} Products` : "Uniform Store",
-              }))
-            : FEATURED_SCHOOLS
-          ).map((school) => (
-            <Link
-              key={school.code}
-              href={`/s/${school.code.toLowerCase()}`}
-              className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs hover:shadow-xl hover:border-blue-300 hover:-translate-y-1 transition-all duration-200 flex items-center justify-between gap-4 group cursor-pointer"
-            >
-              <div className="flex items-center gap-4 min-w-0">
-                {/* School Logo Avatar / Badge */}
-                <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-200/80 p-1 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden group-hover:scale-105 transition-transform">
-                  {school.logoImage ? (
-                    <img
-                      src={school.logoImage}
-                      alt={school.name}
-                      className="w-full h-full object-contain rounded-xl"
-                    />
-                  ) : (
-                    <div
-                      className="w-full h-full rounded-xl flex items-center justify-center font-black text-sm text-white shadow-inner"
-                      style={{ backgroundColor: school.primaryColor || "#1e3a8a" }}
-                    >
-                      {school.logoText || school.code.slice(0, 3)}
-                    </div>
-                  )}
-                </div>
-
-                {/* School Info */}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md bg-blue-50 text-blue-800 border border-blue-100">
+        {allSchoolsList.length === 0 ? (
+          <div className="bg-white rounded-2xl p-8 text-center border border-slate-200 shadow-2xs space-y-2 max-w-md mx-auto">
+            <SchoolIcon className="w-8 h-8 text-slate-300 mx-auto" />
+            <h3 className="font-bold text-slate-800 text-sm">No schools found</h3>
+            <p className="text-xs text-slate-400">
+              No registered partner institutions at this time.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
+            {allSchoolsList.map((school) => (
+              <Link
+                key={school.code}
+                href={`/s/${school.code.toLowerCase()}`}
+                className="group bg-white rounded-2xl border border-slate-200/90 hover:border-blue-600 hover:shadow-md p-3.5 transition-all duration-200 flex flex-col justify-between cursor-pointer"
+              >
+                <div>
+                  {/* Top: School Logo + Code Badge */}
+                  <div className="flex items-center justify-between gap-2 mb-2.5">
+                    <SchoolAvatar school={school} className="w-11 h-11" />
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-slate-50 text-slate-600 border border-slate-200/70 group-hover:bg-blue-50 group-hover:text-blue-800 group-hover:border-blue-200 transition-colors">
                       {school.code}
                     </span>
                   </div>
-                  <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-snug truncate group-hover:text-blue-900 transition-colors">
-                    {school.name || school.fullName}
+
+                  {/* School Name */}
+                  <h3 className="font-bold text-slate-900 text-sm leading-snug line-clamp-2 min-h-[38px] group-hover:text-blue-900 transition-colors">
+                    {school.fullName || school.name}
                   </h3>
-                  <p className="text-xs text-slate-400 font-medium mt-0.5">
-                    {school.productsCount || "Official Store"}
+
+                  {/* Location snippet */}
+                  <p className="text-[11px] text-slate-400 font-medium truncate flex items-center gap-1 mt-1">
+                    <MapPin className="w-3 h-3 shrink-0 text-slate-400" />
+                    <span>{school.city || "Official Store"}</span>
                   </p>
                 </div>
-              </div>
 
-              {/* Action Button */}
-              <div className="w-10 h-10 rounded-2xl bg-slate-50 group-hover:bg-[#0c2461] text-slate-400 group-hover:text-white flex items-center justify-center shrink-0 transition-all duration-200 shadow-2xs">
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-              </div>
-            </Link>
-          ))}
-        </div>
+                {/* Bottom Action Footer */}
+                <div className="pt-2.5 mt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <span className="text-[10px] font-medium text-slate-400">
+                    {school.productsCount || "Uniforms"}
+                  </span>
+                  <span className="inline-flex items-center gap-1 font-bold text-blue-900 group-hover:text-blue-600 transition-colors text-[11px]">
+                    <span>Store</span>
+                    <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* ========================================================================= */}

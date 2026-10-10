@@ -286,32 +286,45 @@ function SchoolOrdersContent() {
               >
                 {/* Header Row */}
                 <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-700/60 pb-3.5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-blue-600/10 border border-blue-500/20 text-blue-400 flex items-center justify-center font-mono font-bold text-xs">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="hidden sm:flex min-w-10 h-10 px-2 shrink-0 rounded-2xl bg-blue-600/10 border border-blue-500/20 text-blue-400 items-center justify-center font-mono font-bold text-xs">
                       #{ord.order_no.split("-")[1] || ord.id}
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <span className="font-mono font-black text-white text-sm">
                           #{ord.order_no}
                         </span>
-                        <Badge
-                          variant={
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border capitalize ${
                             isDelivered
-                              ? "success"
-                              : isPacked
-                              ? "warning"
+                              ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
                               : isOut
-                              ? "brand"
-                              : isPending
-                              ? "warning"
-                              : "neutral"
-                          }
+                              ? "bg-sky-500/15 text-sky-300 border-sky-500/30"
+                              : isPacked
+                              ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+                              : ord.order_status === "cancelled"
+                              ? "bg-rose-500/15 text-rose-300 border-rose-500/30"
+                              : "bg-slate-700/50 text-slate-300 border-slate-600/80"
+                          }`}
                         >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              isDelivered
+                                ? "bg-emerald-400"
+                                : isOut
+                                ? "bg-sky-400"
+                                : isPacked
+                                ? "bg-amber-400"
+                                : ord.order_status === "cancelled"
+                                ? "bg-rose-400"
+                                : "bg-slate-400"
+                            }`}
+                          />
                           {ord.order_status.replace(/_/g, " ")}
-                        </Badge>
+                        </span>
                       </div>
-                      <div className="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
+                      <div className="text-[11px] text-slate-400 flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
                         <Calendar className="w-3 h-3 text-slate-500" />
                         <span>{new Date(ord.createdAt).toLocaleString("en-IN")}</span>
                         <span>&bull;</span>
@@ -323,7 +336,7 @@ function SchoolOrdersContent() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 [&_button]:whitespace-nowrap">
                     <Button
                       size="sm"
                       onClick={() => setPackingSlipOrder(ord)}
@@ -338,7 +351,7 @@ function SchoolOrdersContent() {
                       <Button
                         size="sm"
                         onClick={() => setEditingOrder(ord)}
-                        className="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold px-3 rounded-xl cursor-pointer"
+                        className="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold h-8 px-3 rounded-xl cursor-pointer"
                       >
                         Change items
                       </Button>
